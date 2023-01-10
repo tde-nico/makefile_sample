@@ -1,0 +1,8 @@
+# dirs
+.vscode
+objs
+
+# files
+program
+._*
+.DS_Store
