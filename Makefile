@@ -21,16 +21,11 @@ NAME			= program
 CC				= gcc
 EXTENSION		= c
 CFLAGS			= -Wall -Wextra -Werror
+IFLAGS			= -I includes
 
 EXECUTION		= ./$(NAME)
 MD				= mkdir -p
 RM				= rm -rf
-TAR_EXCLUSIONS	= --exclude=".git" \
-				  --exclude=".vscode" \
-				  --exclude="objs" \
-				  --exclude="*._*" \
-				  --exclude="*.DS_Store"
-TAR				= tar $(TAR_EXCLUSIONS) -cf
 
 #####   GIT   #####
 
@@ -40,7 +35,6 @@ PUSH = git push
 
 #####   RESOURCES   #####
 
-INCLUDE			= includes
 SRC_DIR			= srcs
 OBJ_DIR			= objs
 
@@ -58,24 +52,24 @@ all: $(NAME)
 
 $(NAME): $(OBJ_SUB_DIRS) $(OBJS)
 	@ $(CC) $(CFLAGS) $(OBJS) -o $@
-	@ echo "$(GREEN)[+] $(NAME) compiled$(END)"
+	@ echo "$(GREEN)[+] $(NAME)$(END)"
 
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.$(EXTENSION)
-	@ $(CC) $(CFLAGS) -I $(INCLUDE) -c $< -o $@
-	@ echo "$(BLUE)[+] $@ compiled$(END)"
+	@ $(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
+	@ echo "$(BLUE)[+] $@$(END)"
 
 $(OBJ_SUB_DIRS):
 	@ $(MD) $(OBJ_SUB_DIRS)
-	@ echo "$(PURPLE)[+] $(SRC_DIR) remapped into $(OBJ_DIR) $(END)"
+	@ echo "$(PURPLE)[+] $(SRC_DIR) -> $(OBJ_DIR) $(END)"
 
 
 clean:
 	@ $(RM) $(OBJ_DIR)
-	@ echo "$(YELLOW)[+] $(OBJ_DIR) cleaned$(END)"
+	@ echo "$(YELLOW)[+] $(OBJ_DIR)$(END)"
 
 fclean: clean
 	@ $(RM) $(NAME)
-	@ echo "$(YELLOW)[+] $(NAME) fcleaned$(END)"
+	@ echo "$(YELLOW)[+] $(NAME)$(END)"
 
 re: fclean all
 
@@ -92,10 +86,6 @@ test: all
 run: test
 rrun: fclean test
 
-tar: fclean
-	@ $(TAR) ../$(NAME).tar .
-	@ echo "$(GREEN)[+] Made tar$(END)"
-
 val: all
 	valgrind --leak-check=full $(EXECUTION)
 var: val
@@ -106,12 +96,7 @@ git:
 	@ $(COMMIT) $(MESSAGE)
 	@ $(PUSH)
 
-setup:
-	@ echo "# dirs\n.vscode\n$(OBJ_DIR)\n\n# files\n$(NAME)\n._*\n.DS_Store" > .gitignore
-	@ $(MD) $(SRC_DIR) $(INCLUDE)
-	@ echo "$(GREEN)[+] Setup completed$(END)"
-
 
 #####   PHONY   #####
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re bonus test run rrun val var git
